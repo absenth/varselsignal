@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import rtsp
 
 stream_server = "192.168.1.139"
-stream_user = "streamuser"
-stream_pass = "passwd123"
-stream_port = "1050"
-stream_channel = "601"
+stream_user = "streamuser"      # Put something better here.
+stream_pass = "passwd123"       # Put something better here.
+stream_port = "1050"            # Set to your RTSP Server Port
+stream_channel = "601"          # This could be several channels, if we wanted to monitor more than one?
 
 stream = "rtmp://{stream_user}:{stream_pass}@{stream_server}/Streaming/Channels/{stream_channel}"
 
