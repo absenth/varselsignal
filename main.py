@@ -1,15 +1,22 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import rtsp
 
-image = plt.imread('corner-still.png')
+stream_server = "192.168.1.139"
+stream_user = "streamuser"
+stream_pass = "passwd123"
+stream_port = "1050"
+stream_channel = "601"
+
+stream = "rtmp://{stream_user}:{stream_pass}@{stream_server}/Streaming/Channels/{stream_channel}"
 
 classes = None
-with open('coco.names', 'r') as f:
+with open('security-cameras.names', 'r') as f:
     classes = [line.strip() for line in f.readlines()]
 
-net = cv2.dnn.readNet('yolov3-tiny.weights', 'yolov3-tiny.cfg')
-net.setInput(cv2.dnn.blobFromImage(image, 0.00392, (416,416), (0,0,0), True, crop=False))
+net = cv2.dnn.readNet('security-cameras_best.weights', 'yolov4-tiny.cfg')
+net.setInput(cv2.dnn.blobFromImage(image, 0.00392, (480,256), (0,0,0), True, crop=False))
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 outs = net.forward(output_layers)
@@ -43,7 +50,6 @@ for i in indices:
     i = i[0]
     box = boxes[i]
     if class_ids[i]==0:
-        label = str(classes[class_id]) 
+        label = str(classes[class_id])
         cv2.rectangle(image, (round(box[0]),round(box[1])), (round(box[0]+box[2]),round(box[1]+box[3])), (0, 0, 0), 2)
         cv2.putText(image, label, (round(box[0])-10,round(box[1])-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-plt.imwrite('corner_still-yolo.png')
