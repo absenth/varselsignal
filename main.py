@@ -26,6 +26,7 @@ def detect_people(frame, outs, height, width, confidence_min):
         for detection in out:
             scores = detection[5:]
             class_id = np.argmax(scores)
+            confidence = scores[class_id]
             if confidence > confidence_min:
                 print(f"Confidence: {confidence}, min {confidence_min}")
                 center_x = int(detection[0] * width)
@@ -60,14 +61,15 @@ def put_boxes(frame, boxes, confidences, class_ids):
     return frame
 
 
-def main(confidence_min):
-    frame_counter = 1
-    cap = cv2.VideoCapture(f"rtsp://{stream_user}:{stream_pass}@{stream_server} / Streaming/Channels/{stream_channel}")
+def main():
+    confidence_min = 0.9
+    frames_counter = 1
+    cap = cv2.VideoCapture(f"rtsp://{stream_user}:{stream_pass}@{stream_server}/Streaming/Channels/{stream_channel}")
 
     if cap.isOpened() is False:
         raise BaseException("Error opening video stream")
 
-    net = cv.dnn.readNet('security-cameras_best.weights', 'yolov4-tiny.cfg')
+    net = cv2.dnn.readNet('security-cameras_best.weights', 'yolov4-tiny.cfg')
 
     while True:
         frames_counter = frames_counter + 1
@@ -89,7 +91,8 @@ def main(confidence_min):
         net.setInput(blob)
 
         layer_names = net.getLayerNames()
-        output_layers = [layer_names[i-1] for i in net.getUnconnectedOutLayers()]
+        # FIXME - the following line is suspect (added [0])
+        output_layers = [layer_names[i[0]-1] for i in net.getUnconnectedOutLayers()]
 
         outs = net.forward(output_layers)
         print("Detecting People")
@@ -108,68 +111,5 @@ def main(confidence_min):
     cv2.destroyAllWindows()
 
 
-if __name__ == " __main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--confidence", type=float, dest="confidence", default=0.1)
-    args = parser.parse_args()
-
-    main(args.confidence)
-
-
-
-
-'''
-    while(1):
-
-        ret, frame = vcap.read()
-        cv2.imshow('VIDEO', frame)
-        cv2.waitKey(1)
-
-https://pastebin.com/M5fvXFTy
-
-### OLD STUFF -- This is for reference only.
-  classes = None
-  with open('security-cameras.names', 'r') as f:
-    classes = [line.strip() for line in f.readlines()]
-
-  net = cv.dnn.readNet('security-cameras_best.weights', 'yolov4-tiny.cfg')
-  net.setInput(cv.dnn.blobFromImage(vcap, 0.00392, (480,256), (0,0,0), True, crop=False))
-  layer_names = net.getLayerNames()
-  output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-  outs = net.forward(output_layers)
-
-
-  class_ids = []
-  confidences = []
-  boxes = []
-  Width = vcap.shape[1]
-  Height = vcap.shape[0]
-  for out in outs:
-    for detection in out:
-        scores = detection[5:]
-        class_id = np.argmax(scores)
-        confidence = scores[class_id]
-        if confidence > 0.1:
-            center_x = int(detection[0] * Width)
-            center_y = int(detection[1] * Height)
-            w = int(detection[2] * Width)
-            h = int(detection[3] * Height)
-            x = center_x - w / 2
-            y = center_y - h / 2
-            class_ids.append(class_id)
-            confidences.append(float(confidence))
-            boxes.append([x, y, w, h])
-
-
-  indices = cv.dnn.NMSBoxes(boxes, confidences, 0.1, 0.1)
-  #check if is people detection
-  for i in indices:
-    i = i[0]
-    box = boxes[i]
-    if class_ids[i]==0:
-        label = str(classes[class_id])
-  #        cv.rectangle(vcap, (round(box[0]),round(box[1])), (round(box[0]+box[2]),round(box[1]+box[3])), (0, 0, 0), 2)
-  #        cv.putText(vcap, label, (round(box[0])-10,round(box[1])-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-        cv.rectangle(vcap, (round(box[0]),round(box[1])), (round(box[0]+box[2]),round(box[1]+box[3])), (255, 255, 0), 1)
-        cv.putText(vcap, label, (round(box[0])-10,round(box[1])-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-'''
+if __name__ == "__main__":
+    main()
