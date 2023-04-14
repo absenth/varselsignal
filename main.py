@@ -48,8 +48,8 @@ def main():
                 continue
             if confidence < 0.50:
                 continue
-            cv2.rectangle(frame, (x, y), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, class_names[cls], (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.rectangle(frame, (x, y), (x2, y2), (0, 0, 224), 2)
+            cv2.putText(frame, class_names[cls], (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 224), 2)
 
         cv2.imshow('IMG', frame)
         key = cv2.waitKey(1)
